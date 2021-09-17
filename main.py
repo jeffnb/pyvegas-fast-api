@@ -2,7 +2,7 @@ import csv
 from copy import copy
 from uuid import uuid4, UUID
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel, Field
 
 app = FastAPI()
@@ -26,18 +26,18 @@ class Cereal(BaseModel):
     rating: float
 
 # These are just to simulate a data store
-data = []
+cereals = []
 def setup():
     with open("cereal.csv", "r") as f:
         reader = csv.DictReader(f)
         for idx, line in enumerate(reader):
-            data.append(Cereal(**line))
+            cereals.append(Cereal(**line))
 
 
 @app.get("/cereals/")
 def get_all(q: str = None, calories: int = None):
 
-    filtered = copy(data)
+    filtered = copy(cereals)
 
     if q:
         filtered = [cereal for cereal in filtered if q.lower() in cereal.name.lower()]
@@ -46,6 +46,23 @@ def get_all(q: str = None, calories: int = None):
         filtered = [cereal for cereal in filtered if cereal.calories == calories]
 
     return filtered
+
+@app.get("/cereals/{cereal_id}")
+def get_one(cereal_id: UUID):
+    """
+    Get the cereal with the given UUID
+    Args:
+        cereal_id:
+
+    Returns:
+    """
+    results = [cereal for cereal in cereals if cereal.uid == cereal_id]
+
+    if not results:
+        raise HTTPException(status_code=404, detail="Item not found with that id")
+
+    return results[0]
+
 
 setup()
 
