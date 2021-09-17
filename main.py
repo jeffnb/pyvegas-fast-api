@@ -36,7 +36,16 @@ def setup():
 
 @app.get("/cereals/")
 def get_all(q: str = None, calories: int = None):
-    return data
+
+    filtered = copy(data)
+
+    if q:
+        filtered = [cereal for cereal in filtered if q.lower() in cereal.name.lower()]
+
+    if calories:
+        filtered = [cereal for cereal in filtered if cereal.calories == calories]
+
+    return filtered
 
 setup()
 
