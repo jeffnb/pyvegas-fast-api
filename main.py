@@ -26,6 +26,27 @@ class Cereal(BaseModel):
     cups: float = Field(ge=0)
     rating: float = Field(gt=0)
 
+    def normalize(self):
+        """
+        return a normalized view to 1 cup
+        Returns:
+        """
+        new_numbers = self.copy()
+        ratio = 1/new_numbers.cups
+
+        new_numbers.cups = 1
+        new_numbers.calories *= ratio
+        new_numbers.protein *= ratio
+        new_numbers.sodium *= ratio
+        new_numbers.fiber *= ratio
+        new_numbers.carbo *= ratio
+        new_numbers.sugars *= ratio
+        new_numbers.potass *= ratio
+        new_numbers.vitamins *= ratio
+
+        return new_numbers
+
+
 # These are just to simulate a data store
 cereals = []
 def setup():
@@ -57,12 +78,12 @@ def create_new(cereal: Cereal):
 
 
 @app.get("/cereals/{cereal_id}")
-def get_one(cereal_id: UUID):
+def get_one(cereal_id: UUID, normalize: Optional[bool] = False):
     """
     Get the cereal with the given UUID
     Args:
         cereal_id:
-
+        normalize:
     Returns:
     """
     results = [cereal for cereal in cereals if cereal.uid == cereal_id]
@@ -70,7 +91,11 @@ def get_one(cereal_id: UUID):
     if not results:
         raise HTTPException(status_code=404, detail="Item not found with that id")
 
-    return results[0]
+    cereal = results[0]
+    if normalize:
+        cereal = cereal.normalize()
+
+    return cereal
 
 
 setup()
