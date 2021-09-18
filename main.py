@@ -1,9 +1,11 @@
+import asyncio
 import csv
+import time
 from copy import copy
 from typing import Optional
 from uuid import uuid4, UUID
 
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 
 app = FastAPI()
@@ -56,8 +58,15 @@ def setup():
             cereals.append(Cereal(**line))
 
 
+def sleepy():
+    print("About to sleep")
+    time.sleep(20)
+    print("Sleepy time over")
+
+
 @app.get("/cereals/")
-def get_all(q: Optional[str] = Query(None, max_length=50, description="Search names"),
+def get_all(background_tasks: BackgroundTasks,
+            q: Optional[str] = Query(None, max_length=50, description="Search names"),
             calories: Optional[int] = Query(None, ge=0, description="Calories to match")):
 
     filtered = copy(cereals)
@@ -68,6 +77,7 @@ def get_all(q: Optional[str] = Query(None, max_length=50, description="Search na
     if calories:
         filtered = [cereal for cereal in filtered if cereal.calories == calories]
 
+    background_tasks.add_task(sleepy)
     return filtered
 
 
