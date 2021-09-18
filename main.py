@@ -49,6 +49,13 @@ def get_all(q: Optional[str] = Query(None, max_length=50, description="Search na
 
     return filtered
 
+
+@app.post("/cereals")
+def create_new(cereal: Cereal):
+    cereals.append(cereal)
+    return cereal
+
+
 @app.get("/cereals/{cereal_id}")
 def get_one(cereal_id: UUID):
     """
