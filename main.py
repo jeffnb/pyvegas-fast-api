@@ -30,7 +30,7 @@ data = []
 def setup():
     with open("cereal.csv", "r") as f:
         reader = csv.DictReader(f)
-        for idx, line in enumerate(reader):
+        for line in reader:
             data.append(Cereal(**line))
 
 
