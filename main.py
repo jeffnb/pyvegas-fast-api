@@ -1,5 +1,6 @@
 import csv
 from copy import copy
+from typing import Optional
 from uuid import uuid4, UUID
 
 from fastapi import FastAPI, Query, HTTPException
@@ -9,21 +10,21 @@ app = FastAPI()
 
 class Cereal(BaseModel):
     uid: UUID = Field(default_factory=uuid4)
-    name: str
-    mfr: str
-    type: str
-    calories: int
-    protein: int
-    sodium: int
-    fiber: float
-    carbo: float
-    sugars: int
-    potass: int
-    vitamins: int
-    shelf: int
-    weight: float
-    cups: float
-    rating: float
+    name: str = Field(max_length=50)
+    mfr: str = Field(max_length=1)
+    type: str = Field(max_length=1)
+    calories: int = Field(ge=0)
+    protein: int = Field(ge=0)
+    sodium: int = Field(ge=0)
+    fiber: float = Field(ge=0)
+    carbo: float = Field(ge=-1)
+    sugars: int = Field(ge=-1)
+    potass: int = Field(ge=-1)
+    vitamins: int = Field(ge=0)
+    shelf: int = Field(ge=0)
+    weight: float = Field(ge=0)
+    cups: float = Field(ge=0)
+    rating: float = Field(gt=0)
 
 # These are just to simulate a data store
 cereals = []
@@ -35,7 +36,8 @@ def setup():
 
 
 @app.get("/cereals/")
-def get_all(q: str = None, calories: int = None):
+def get_all(q: Optional[str] = Query(None, max_length=50, description="Search names"),
+            calories: Optional[int] = Query(None, ge=0, description="Calories to match")):
 
     filtered = copy(cereals)
 
