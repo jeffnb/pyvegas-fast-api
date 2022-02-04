@@ -35,7 +35,7 @@ def setup():
 
 
 @app.get("/cereals/")
-def get_all(q: str = None, calories: int = None):
+def get_all():
     return data
 
 setup()
